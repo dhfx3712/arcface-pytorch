@@ -1,4 +1,6 @@
 from __future__ import print_function
+import sys
+sys.path.append('/Users/admin/data/test_project/arcface-pytorch')
 import os
 from data import Dataset
 import torch
@@ -11,7 +13,7 @@ import torch
 import numpy as np
 import random
 import time
-from config import Config
+from config.config import Config
 from torch.nn import DataParallel
 from torch.optim.lr_scheduler import StepLR
 from test import *
@@ -28,7 +30,8 @@ if __name__ == '__main__':
     opt = Config()
     if opt.display:
         visualizer = Visualizer()
-    device = torch.device("cuda")
+    # device = torch.device("cuda")
+    device = torch.device("cpu")
 
     train_dataset = Dataset(opt.train_root, opt.train_list, phase='train', input_shape=opt.input_shape)
     trainloader = data.DataLoader(train_dataset,
@@ -36,8 +39,8 @@ if __name__ == '__main__':
                                   shuffle=True,
                                   num_workers=opt.num_workers)
 
-    identity_list = get_lfw_list(opt.lfw_test_list)
-    img_paths = [os.path.join(opt.lfw_root, each) for each in identity_list]
+    # identity_list = get_lfw_list(opt.lfw_test_list)
+    # img_paths = [os.path.join(opt.lfw_root, each) for each in identity_list]
 
     print('{} train iters per epoch:'.format(len(trainloader)))
 
@@ -112,9 +115,11 @@ if __name__ == '__main__':
                 start = time.time()
 
         if i % opt.save_interval == 0 or i == opt.max_epoch:
+            if not os.path.exists(opt.checkpoints_path):
+                os.mkdir(opt.checkpoints_path)
             save_model(model, opt.checkpoints_path, opt.backbone, i)
 
-        model.eval()
-        acc = lfw_test(model, img_paths, identity_list, opt.lfw_test_list, opt.test_batch_size)
-        if opt.display:
-            visualizer.display_current_results(iters, acc, name='test_acc')
+        # model.eval()
+        # acc = lfw_test(model, img_paths, identity_list, opt.lfw_test_list, opt.test_batch_size)
+        # if opt.display:
+        #     visualizer.display_current_results(iters, acc, name='test_acc')

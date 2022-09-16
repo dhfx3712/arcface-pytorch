@@ -27,15 +27,18 @@ class ArcMarginProduct(nn.Module):
         nn.init.xavier_uniform_(self.weight)
 
         self.easy_margin = easy_margin
-        self.cos_m = math.cos(m)
-        self.sin_m = math.sin(m)
-        self.th = math.cos(math.pi - m)
-        self.mm = math.sin(math.pi - m) * m
+        self.cos_m = math.cos(m) #0.8775825618903728
+        self.sin_m = math.sin(m) #0.479425538604203
+        self.th = math.cos(math.pi - m) #-0.8775825618903726
+        self.mm = math.sin(math.pi - m) * m #0.23971276930210156
 
     def forward(self, input, label):
         # --------------------------- cos(theta) & phi(theta) ---------------------------
+        #正则和cos
         cosine = F.linear(F.normalize(input), F.normalize(self.weight))
+        #sin
         sine = torch.sqrt((1.0 - torch.pow(cosine, 2)).clamp(0, 1))
+        # cos(theta + m) 余弦公式
         phi = cosine * self.cos_m - sine * self.sin_m
         if self.easy_margin:
             phi = torch.where(cosine > 0, phi, cosine)
@@ -43,10 +46,15 @@ class ArcMarginProduct(nn.Module):
             phi = torch.where(cosine > self.th, phi, cosine - self.mm)
         # --------------------------- convert label to one-hot ---------------------------
         # one_hot = torch.zeros(cosine.size(), requires_grad=True, device='cuda')
-        one_hot = torch.zeros(cosine.size(), device='cuda')
+        # one_hot = torch.zeros(cosine.size(), device='cuda')
+        one_hot = torch.zeros(cosine.size(), device='cpu')
+        print (f'初始化 ： {one_hot.shape}') #torch.Size([batch, num_classes])
+        # scatter_用法
         one_hot.scatter_(1, label.view(-1, 1).long(), 1)
+        print (f'转化onehot ： {one_hot.shape}') #torch.Size([batch, num_classes])
         # -------------torch.where(out_i = {x_i if condition_i else y_i) -------------
         output = (one_hot * phi) + ((1.0 - one_hot) * cosine)  # you can use torch.where if your torch.__version__ is 0.4
+        print (f'输出 ： {output.shape}') #torch.Size([batch, num_classes])
         output *= self.s
         # print(output)
 

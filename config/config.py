@@ -2,7 +2,8 @@ class Config(object):
     env = 'default'
     backbone = 'resnet18'
     classify = 'softmax'
-    num_classes = 13938
+    # num_classes = 13938
+    num_classes = 2
     metric = 'arc_margin'
     easy_margin = False
     use_se = False
@@ -11,8 +12,11 @@ class Config(object):
     display = False
     finetune = False
 
-    train_root = '/data/Datasets/webface/CASIA-maxpy-clean-crop-144/'
-    train_list = '/data/Datasets/webface/train_data_13938.txt'
+    # train_root = '/data/Datasets/webface/CASIA-maxpy-clean-crop-144/'
+    # train_list = '/data/Datasets/webface/train_data_13938.txt'
+    train_root = '/Users/admin/data/cls/'
+    train_list = '/Users/admin/data/cls/train_helmet.txt'
+
     val_list = '/data/Datasets/webface/val_data_13938.txt'
 
     test_root = '/data1/Datasets/anti-spoofing/test/data_align_256'
@@ -21,10 +25,10 @@ class Config(object):
     lfw_root = '/data/Datasets/lfw/lfw-align-128'
     lfw_test_list = '/data/Datasets/lfw/lfw_test_pair.txt'
 
-    checkpoints_path = 'checkpoints'
+    checkpoints_path = './checkpoints'
     load_model_path = 'models/resnet18.pth'
     test_model_path = 'checkpoints/resnet18_110.pth'
-    save_interval = 10
+    save_interval = 10 #间隔存模型
 
     train_batch_size = 16  # batch size
     test_batch_size = 60
@@ -35,13 +39,14 @@ class Config(object):
 
     use_gpu = True  # use GPU or not
     gpu_id = '0, 1'
-    num_workers = 4  # how many workers for loading data
-    print_freq = 100  # print info every N batch
+    # num_workers = 4  # how many workers for loading data
+    num_workers = 0  # how many workers for loading data
+    print_freq = 2  # print info every N batch
 
     debug_file = '/tmp/debug'  # if os.path.exists(debug_file): enter ipdb
     result_file = 'result.csv'
 
-    max_epoch = 50
+    max_epoch = 10
     lr = 1e-1  # initial learning rate
     lr_step = 10
     lr_decay = 0.95  # when val_loss increase, lr = lr*lr_decay
