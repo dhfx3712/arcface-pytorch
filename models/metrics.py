@@ -48,13 +48,13 @@ class ArcMarginProduct(nn.Module):
         # one_hot = torch.zeros(cosine.size(), requires_grad=True, device='cuda')
         # one_hot = torch.zeros(cosine.size(), device='cuda')
         one_hot = torch.zeros(cosine.size(), device='cpu')
-        print (f'初始化 ： {one_hot.shape}') #torch.Size([batch, num_classes])
+        # print (f'初始化 ： {one_hot.shape}') #torch.Size([batch, num_classes])
         # scatter_用法
         one_hot.scatter_(1, label.view(-1, 1).long(), 1)
-        print (f'转化onehot ： {one_hot.shape}') #torch.Size([batch, num_classes])
+        # print (f'转化onehot ： {one_hot.shape}') #torch.Size([batch, num_classes])
         # -------------torch.where(out_i = {x_i if condition_i else y_i) -------------
         output = (one_hot * phi) + ((1.0 - one_hot) * cosine)  # you can use torch.where if your torch.__version__ is 0.4
-        print (f'输出 ： {output.shape}') #torch.Size([batch, num_classes])
+        # print (f'输出 ： {output.shape}') #torch.Size([batch, num_classes])
         output *= self.s
         # print(output)
 

@@ -37,6 +37,7 @@ if __name__ == '__main__':
     trainloader = data.DataLoader(train_dataset,
                                   batch_size=opt.train_batch_size,
                                   shuffle=True,
+                                  drop_last=True,
                                   num_workers=opt.num_workers)
 
     # identity_list = get_lfw_list(opt.lfw_test_list)
@@ -50,7 +51,8 @@ if __name__ == '__main__':
         criterion = torch.nn.CrossEntropyLoss()
 
     if opt.backbone == 'resnet18':
-        model = resnet_face18(use_se=opt.use_se)
+        # model = resnet_face18(use_se=opt.use_se)
+        model = resnet18()
     elif opt.backbone == 'resnet34':
         model = resnet34()
     elif opt.backbone == 'resnet50':
@@ -66,7 +68,7 @@ if __name__ == '__main__':
         metric_fc = nn.Linear(512, opt.num_classes)
 
     # view_model(model, opt.input_shape)
-    print(model)
+    # print(model)
     model.to(device)
     model = DataParallel(model)
     metric_fc.to(device)
@@ -102,9 +104,9 @@ if __name__ == '__main__':
                 output = output.data.cpu().numpy()
                 output = np.argmax(output, axis=1)
                 label = label.data.cpu().numpy()
-                # print(output)
-                # print(label)
-                acc = np.mean((output == label).astype(int))
+                print(f'output : {output}')
+                print(f'label : {label}')
+                acc = np.mean((output == label).astype(float))
                 speed = opt.print_freq / (time.time() - start)
                 time_str = time.asctime(time.localtime(time.time()))
                 print('{} train epoch {} iter {} {} iters/s loss {} acc {}'.format(time_str, i, ii, speed, loss.item(), acc))

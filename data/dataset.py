@@ -19,8 +19,16 @@ class Dataset(data.Dataset):
             imgs = fd.readlines()
 
         imgs = [os.path.join(root, img[:-1]) for img in imgs]
+        print (f'imgs : {imgs[0:10]}')
         self.imgs = np.random.permutation(imgs)
 
+        with open(os.path.join(root,"label.txt"), 'r') as f:
+            label_n = f.readlines()
+
+        label_n =[i.replace('\n','') for i in label_n]
+        label_n.sort()
+        self.label2ix ={label:index for index,label in enumerate(label_n)}
+        print(self.label2ix)
         # normalize = T.Normalize(mean=[0.5, 0.5, 0.5],
         #                         std=[0.5, 0.5, 0.5])
 
@@ -48,7 +56,7 @@ class Dataset(data.Dataset):
         data = Image.open(img_path)
         data = data.convert('L')
         data = self.transforms(data)
-        label = np.int32(splits[1])
+        label = np.int32(self.label2ix[splits[1]])
         return data.float(), label
 
     def __len__(self):

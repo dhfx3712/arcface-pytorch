@@ -34,6 +34,7 @@ def get_lfw_list(pair_list):
 
 def load_image(img_path):
     image = cv2.imread(img_path, 0)
+    image = cv2.resize(image,(128,128))
     if image is None:
         return None
     image = np.dstack((image, np.fliplr(image)))
@@ -50,20 +51,23 @@ def get_featurs(model, test_list, batch_size=10):
     features = None
     cnt = 0
     for i, img_path in enumerate(test_list):
-        image = load_image(img_path)
+        try:
+            image = load_image(img_path)
+        except:
+            print(f"try img_path : {img_path}")
         if image is None:
             print('read {} error'.format(img_path))
-
+        print (f'images_shape : {np.shape(images)} , image_shape : {np.shape(image)}')
         if images is None:
             images = image
         else:
             images = np.concatenate((images, image), axis=0)
-
         if images.shape[0] % batch_size == 0 or i == len(test_list) - 1:
             cnt += 1
 
             data = torch.from_numpy(images)
-            data = data.to(torch.device("cuda"))
+            # data = data.to(torch.device("cuda"))
+            data = data.to(torch.device("cpu"))
             output = model(data)
             output = output.data.cpu().numpy()
 
@@ -154,7 +158,8 @@ if __name__ == '__main__':
 
     opt = Config()
     if opt.backbone == 'resnet18':
-        model = resnet_face18(opt.use_se)
+        # model = resnet_face18(opt.use_se)
+        model = resnet18()
     elif opt.backbone == 'resnet34':
         model = resnet34()
     elif opt.backbone == 'resnet50':
@@ -163,10 +168,11 @@ if __name__ == '__main__':
     model = DataParallel(model)
     # load_model(model, opt.test_model_path)
     model.load_state_dict(torch.load(opt.test_model_path))
-    model.to(torch.device("cuda"))
+    model.to(torch.device("cpu"))
 
     identity_list = get_lfw_list(opt.lfw_test_list)
     img_paths = [os.path.join(opt.lfw_root, each) for each in identity_list]
+    # print (f'img_paths : {img_paths}')
 
     model.eval()
     lfw_test(model, img_paths, identity_list, opt.lfw_test_list, opt.test_batch_size)
